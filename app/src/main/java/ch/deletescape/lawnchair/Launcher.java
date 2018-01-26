@@ -68,6 +68,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -164,7 +165,7 @@ public class Launcher extends Activity
     private static final int REQUEST_EDIT_ICON = 14;
 
     private static final float BOUNCE_ANIMATION_TENSION = 1.3f;
-    
+
     private static final int SOFT_INPUT_MODE_DEFAULT =
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
     private static final int SOFT_INPUT_MODE_ALL_APPS =
@@ -1023,7 +1024,8 @@ public class Launcher extends Activity
                 // If there are multiple keystrokes before the search dialog takes focus,
                 // onSearchRequested() will be called for every keystroke,
                 // but it is idempotent, so it's fine.
-                return onSearchRequested();
+                //return onSearchRequested();
+                return true;
             }
         }
 
@@ -1055,6 +1057,13 @@ public class Launcher extends Activity
             }
             return true;
         }
+
+        long duration = event.getEventTime() - event.getDownTime();
+        System.out.println("Key "
+            + KeyEvent.keyCodeToString(event.getKeyCode())
+            + " down for "
+            + duration
+            + " ms.");
         return super.onKeyUp(keyCode, event);
     }
 
