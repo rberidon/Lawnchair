@@ -1,58 +1,72 @@
 package com.rberidon;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Build;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 import ch.deletescape.lawnchair.Utilities;
 
 public class KeyoneShortcuts {
-  private static Toast toast;
-  private static LauncherApps launcherApps;
+  @SuppressLint("StaticFieldLeak") public static final KeyoneShortcuts INSTANCE =
+      new KeyoneShortcuts();
+  private boolean active = false;
+  private Context context;
+  private Toast toast;
+  private LauncherApps launcherApps;
 
-  public static void onKeyUp(Context context, int keyCode, KeyEvent event) {
-    handleKey(context, event);
+  public void init(Context context) {
+    this.context = context;
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+      launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+      active = launcherApps != null;
+    }
   }
 
-  private static void handleKey(Context context, KeyEvent event) {
+  @TargetApi(Build.VERSION_CODES.N_MR1) public boolean onKeyUp(int keyCode, KeyEvent event) {
+    if (!active) return false;
     switch (event.getKeyCode()) {
       case KeyEvent.KEYCODE_E:
-        startShortcut(context, AppShortcuts.CHROME);
-        break;
+        return startShortcut(AppShortcuts.CHROME);
       default:
-        debugShowKeyToast(context, event);
-        break;
+        debugShowKeyToast(event);
+        return true;
     }
   }
 
-  private static void startShortcut(Context context, ShortcutData shortcutData) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-      if (launcherApps == null) {
-        launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-      }
+  @TargetApi(Build.VERSION_CODES.N_MR1) private boolean startShortcut(ShortcutData shortcutData) {
+    try {
+      UserHandle user = Utilities.myUserHandle();
 
-      try {
+      if (launcherApps.isPackageEnabled(shortcutData.packageName, user)) {
         launcherApps.startShortcut(shortcutData.packageName, shortcutData.shortcutId, null, null,
-            Utilities.myUserHandle());
-      } catch (Throwable e) {
-        Log.e("DeepShortcutManager", "Failed to start shortcut", e);
+            user);
+        return true;
+      } else {
+        return false;
       }
+    } catch (Throwable e) {
+      Log.e("DeepShortcutManager", "Failed to start shortcut", e);
+      return false;
     }
   }
 
-  private static void debugShowKeyToast(Context context, KeyEvent event) {
+  private void debugShowKeyToast(KeyEvent event) {
     long duration = event.getEventTime() - event.getDownTime();
     String log = "Key " //
         + KeyEvent.keyCodeToString(event.getKeyCode()) //
         + " down for " //
         + duration //
         + " ms.";
-    showToast(context, log);
+    showToast(log);
   }
 
-  private static void showToast(Context context, String text) {
+  private void showToast(String text) {
     System.out.println(text);
 
     if (toast != null) {

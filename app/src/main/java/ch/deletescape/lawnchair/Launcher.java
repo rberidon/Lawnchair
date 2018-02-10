@@ -1037,8 +1037,7 @@ public class Launcher extends Activity
             return true;
         }
 
-        KeyoneShortcuts.onKeyUp(getApplicationContext(), keyCode, event);
-        return super.onKeyUp(keyCode, event);
+        return KeyoneShortcuts.INSTANCE.onKeyUp(keyCode, event) || super.onKeyUp(keyCode, event);
     }
 
     @Override
