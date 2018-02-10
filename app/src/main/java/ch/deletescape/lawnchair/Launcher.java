@@ -81,6 +81,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.rberidon.KeyoneShortcuts;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -158,7 +159,7 @@ public class Launcher extends Activity
     private static final int REQUEST_EDIT_ICON = 14;
 
     private static final float BOUNCE_ANIMATION_TENSION = 1.3f;
-    
+
     private static final int SOFT_INPUT_MODE_DEFAULT =
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
     private static final int SOFT_INPUT_MODE_ALL_APPS =
@@ -1035,6 +1036,8 @@ public class Launcher extends Activity
             }
             return true;
         }
+
+        KeyoneShortcuts.onKeyUp(getApplicationContext(), keyCode, event);
         return super.onKeyUp(keyCode, event);
     }
 
